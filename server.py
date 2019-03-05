@@ -1,12 +1,14 @@
-import tornado.ioloop
-import tornado.web
-import importenv
-from line_endpoint.router import LineApiHandler
-from db_endpoint.router import MainHandler
+import env
+env.import_environ()
+import json
+import tornado
+from tornado import ioloop, web
+from line_endpoint.router import LineWebRequestHandler
+from app_gateway.router import AppGatewayHandler
 
 application = tornado.web.Application([
-    (r"/line/webhook", LineApiHandler),
-    (r"/gateway", MainHandler),
+    (r"/line/webhook", LineWebRequestHandler),
+    (r"/app/gateway", AppGatewayHandler),
 ])
 
 if __name__ == "__main__":

@@ -12,33 +12,41 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
 
-line_bot_api = LineBotApi(str(os.environ.get('CHANNEL_ACCESS_TOKEN')))
-handler = WebhookHandler(str(os.environ.get('CHANNEL_SECRET')))
+line_client = LineBotApi(str(os.environ.get('CHANNEL_ACCESS_TOKEN')))
+line_handler = WebhookHandler(str(os.environ.get('CHANNEL_SECRET')))
 
-@handler.add(MessageEvent, message=TextMessage)
+@line_handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    url = os.environ.get('API_APP_GATEWAY')
+    body = {
+        'request_message': event.message.text
+    }
     @gen.coroutine
-    def fetch_api():
+    def requestasync():
         http_client = httpclient.AsyncHTTPClient()
-        http_req = httpclient.HTTPRequest(os.environ.get('API_GATEWAY'), method="POST")
-        http_req.body = json.dumps({
-            'name': 'アイロン'
-        }).encode()
+        http_req = httpclient.HTTPRequest(url, method='POST')
+        http_req.body = json.dumps(body).encode()
         res = yield http_client.fetch(http_req)
-        res = res.body.decode('utf-8')
-
-        line_bot_api.reply_message(
+        res_body = res.body.decode('utf-8')
+        line_client.reply_message(
             event.reply_token,
-            TextSendMessage(text=res)
+            TextSendMessage(text=res_body)
         )
-    fetch_api()
+    requestasync()
 
-class LineApiHandler(tornado.web.RequestHandler):
+class LineWebRequestHandler(tornado.web.RequestHandler):
+    """
+    LINEからの直接のHttpリクエストを処理する。
+    """
     def post(self):
         body = (self.request.body).decode('utf-8')
         signature = self.request.headers['X-Line-Signature']
         try:
-            handler.handle(body, signature)
+            self._fetch_response_message(body, signature)
+#            LineEventHandler.handle(body, signature)
         except InvalidSignatureError as e:
             print(e)
             self.send_error(400)
+
+    def _fetch_response_message(self, body, signature):
+        line_handler.handle(body, signature)
