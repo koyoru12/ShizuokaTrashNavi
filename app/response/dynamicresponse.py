@@ -2,8 +2,9 @@ import os
 import tornado
 import json
 import sqlite3
+import util
 
-class TrashDbHandler():
+class DynamicResponseHandler():
     @classmethod
     def handle(self, message):
         sql = 'select 名前, 種類 from sample where 名前 LIKE "%{name}%"'.format(name=message)
