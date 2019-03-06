@@ -54,4 +54,14 @@ class RequireLocationResponse(AbstractResponse):
                             QuickReplyButton(action=LocationAction(label='location'))
                         ])),
 
-ResponseFactory.register_response(HelpResponse, RequireLocationResponse)
+
+class ResponseLocationResponse(AbstractResponse):
+    """ResponseLocationResponse
+    """
+
+    message_type = 'response_location'
+    def create_response(self):
+        return TextSendMessage(text=self._context['body'])
+
+
+ResponseFactory.register_response(HelpResponse, RequireLocationResponse, ResponseLocationResponse)

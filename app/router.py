@@ -28,8 +28,9 @@ class TextMessageRequestHandler(tornado.web.RequestHandler):
         res = DynamicResponseHandler.handle(request_message)
         self.write(json.dumps(res, ensure_ascii=False).encode())
 
+
 class AddressMessageRequestHandler(tornado.web.RequestHandler):
     def post(self):
         body = json.loads(self.request.body)
-        print(body)
-        self.write('ok')
+        message = MessageFactory.create_message('response_location')
+        self.write(message.to_json().encode())
