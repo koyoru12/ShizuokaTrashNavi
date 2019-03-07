@@ -4,8 +4,8 @@ import json
 import tornado
 from tornado import httpclient, gen
 from app.reply import DynamicReplyHandler, FixedReplyHandler
-from app.user import Users
 from app.models import MessageFactory, TextMessageRequest, AddressMessageRequest, Response
+from app.db import City, User
 
 class RequestHandler(tornado.web.RequestHandler):
     def initialize(self):
@@ -19,22 +19,19 @@ class TextMessageRequestHandler(RequestHandler):
     def post(self):
         body = json.loads(self.request.body)
         request_body = TextMessageRequest(body)
-        message = FixedReplyHandler.handle(request_body)
-        if message is not None:
+
+        # 定型メッセージでの処理を試みる
+        handler = FixedReplyHandler(request_body)
+        for message in handler.handle():
             self.response.append_message(message)
+        if (self.response.message_length() > 0):
             self._send_response()
             return
 
-        # 定型メッセージで処理できなかった場合
-        
-        user_id = body['user_id']
-        res = Users.fetch(user_id)
-        if res is None:
-            message = MessageFactory.create_message('require_address', request_body)
+        # 定型メッセージで処理できない場合は動的メッセージで処理する
+        handler = DynamicReplyHandler(request_body)
+        for message in handler.handle():
             self.response.append_message(message)
-
-        message = DynamicReplyHandler.handle(request_body)
-        self.response.append_message(message)
         self._send_response()
 
         
@@ -49,6 +46,18 @@ class AddressMessageRequestHandler(RequestHandler):
         print(m.group(0))
         print(m.group(1))
         print(m.group(2))
-        message = MessageFactory.create_message('response_address', request_body)
+        city = City.fetch(m.group(2))
+        if city is None:
+            # リクエストされた市町村に対応していない場合
+            message = MessageFactory.create_message('response_address_reject', request_body)
+        else:
+            # 市町村情報を登録
+            if User.fetch(request_body.user_id) is None:
+                # ユーザ登録がない場合は登録
+                User.register(request_body.user_id, city['id'])
+            else:
+                # ユーザ登録がある場合は更新
+                User.update(request_body.user_id, city['id'])
+            message = MessageFactory.create_message('response_address_success', request_body)
         self.response.append_message(message)
         self._send_response()

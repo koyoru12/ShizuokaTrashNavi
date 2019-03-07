@@ -66,7 +66,4 @@ class LineEventHandler():
                 reply
             )
 
-class LineMessageDispatcher():
-    """LineEventHandler
-    """
-    pass
+            

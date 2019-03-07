@@ -2,8 +2,6 @@ import util
 
 
 class MessageFactory():
-    """MessageFactory
-    """
 
     message_dict = {}
 
@@ -21,16 +19,12 @@ class MessageFactory():
 
 
 class AbstractMessage(util.JsonSerializable):
-    """AbstractMessage
-    """
 
     def __init__(self, context):
         self._context = context
 
 
 class HelpMessage(AbstractMessage):
-    """HelpMessage
-    """
 
     message_type = 'help'
     def __init__(self, context):
@@ -40,8 +34,6 @@ class HelpMessage(AbstractMessage):
 
 
 class RequireAddressMessage(AbstractMessage):
-    """RequireAddressMessage
-    """
 
     message_type = 'require_address'
     def __init__(self, context):
@@ -50,32 +42,43 @@ class RequireAddressMessage(AbstractMessage):
         self.type = self.message_type
 
 
-class ResponseAddressMessage(AbstractMessage):
-    """ResponseAddressMessage
-    """
+class ResponseAddressSuccessMessage(AbstractMessage):
 
-    message_type = 'response_address'
+    message_type = 'response_address_success'
     def __init__(self, context):
         super().__init__(context)
         self.body = '地域情報を登録しました！'
         self.type = self.message_type
 
 
+class ResponseAddressRejectMessage(AbstractMessage):
+
+    message_type = 'response_address_reject'
+    def __init__(self, context):
+        super().__init__(context)
+        self.body = 'ごめんなさい。その市町村には対応していません'
+        self.type = self.message_type
+
+
 class TrashInfoMessage(AbstractMessage):
-    """TrashMessage
-    """
 
     message_type = 'trash_info'
     def __init__(self, context):
         super().__init__(context)
-        self.body = 'ごみに関する情報です'
+        self.body = ''
         self.type = self.message_type
         self.trash_info = []
     
     def append_trash_info(self, trash_info):
         if trash_info == None:
-            self.body = 'ごめんなさい。情報が見つかりませんでした。'
-        self.trash_info = trash_info
-    
+            self.body = 'ごめんなさい😣\n情報が見つかりませんでした。'
+        else:
+            trash_dict = {}
+            self.body = trash_info['city_name'] + 'の情報です。お探しはこちらですか？'
+            for key in trash_info.keys():
+                trash_dict[key] = trash_info[key]
+            self.trash_info.append(trash_dict)
 
-MessageFactory.register_message(HelpMessage, RequireAddressMessage, ResponseAddressMessage, TrashInfoMessage)
+MessageFactory.register_message(
+    HelpMessage, RequireAddressMessage, ResponseAddressSuccessMessage,
+    ResponseAddressRejectMessage, TrashInfoMessage)

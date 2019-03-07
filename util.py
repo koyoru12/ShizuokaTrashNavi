@@ -6,7 +6,7 @@ class JsonSerializable():
         return json.dumps(jsondict, ensure_ascii=False)
 
     def _to_dict(self):
-        def re_to_dict(value):
+        def _to_dict_re(value):
             if isinstance(value, JsonSerializable):
                 return value._to_dict()
             else:
@@ -18,9 +18,10 @@ class JsonSerializable():
             if type(value) is list:
                 li = []
                 for item in value:
-                    li.append(re_to_dict(item))
+                    li.append(_to_dict_re(item))
                 jsondict[key] = li
             else:
-                jsondict[key] = re_to_dict(value)
+                jsondict[key] = _to_dict_re(value)
 
         return jsondict
+
