@@ -16,11 +16,8 @@ class LineWebRequestHandler(tornado.web.RequestHandler):
         body = (self.request.body).decode('utf-8')
         signature = self.request.headers['X-Line-Signature']
         try:
-#            self._fetch_response_message(body, signature)
-            LineEventHandler.handle(body, signature)
+            LineEventHandler.handle_request(body, signature)
         except InvalidSignatureError as e:
             print(e)
             self.send_error(400)
 
-    def _fetch_response_message(self, body, signature):
-        line_handler.handle(body, signature)

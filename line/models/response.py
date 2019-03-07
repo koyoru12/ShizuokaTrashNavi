@@ -43,11 +43,11 @@ class HelpResponse(AbstractResponse):
         return TextSendMessage(text=self._context['body'])
 
 
-class RequireLocationResponse(AbstractResponse):
-    """RequireLocationResponse
+class RequireAddressResponse(AbstractResponse):
+    """RequireAddressResponse
     """
 
-    message_type = 'require_location'
+    message_type = 'require_address'
     def create_response(self):
         return TextSendMessage(text=self._context['body'],
                         quick_reply=QuickReply(items=[
@@ -55,13 +55,26 @@ class RequireLocationResponse(AbstractResponse):
                         ])),
 
 
-class ResponseLocationResponse(AbstractResponse):
-    """ResponseLocationResponse
+class ResponseAddressResponse(AbstractResponse):
+    """ResponseAddressResponse
     """
 
-    message_type = 'response_location'
+    message_type = 'response_address'
     def create_response(self):
         return TextSendMessage(text=self._context['body'])
 
 
-ResponseFactory.register_response(HelpResponse, RequireLocationResponse, ResponseLocationResponse)
+class TrashInfoResponse(AbstractResponse):
+    """TrashInfoResponse
+    """
+
+    message_type = 'trash_info'
+    def create_response(self):
+        if self._context['trash_info'] == None:
+            return TextSendMessage(text=self._context['body'])
+        else:
+            return TextSendMessage(text=self._context['trash_info'][0])
+
+
+
+ResponseFactory.register_response(HelpResponse, RequireAddressResponse, ResponseAddressResponse, TrashInfoResponse)

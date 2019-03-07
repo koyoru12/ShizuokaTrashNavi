@@ -13,14 +13,12 @@ from line.models.response import ResponseFactory
 
 
 class LineEventHandler():
-    """LineEventHandler
-    """
-
-    line_client = LineBotApi(str(os.environ.get('CHANNEL_ACCESS_TOKEN')))
-    line_handler = WebhookHandler(str(os.environ.get('CHANNEL_SECRET')))
 
     @classmethod
-    def init(self):
+    def initialize(self):
+        self.line_client = LineBotApi(str(os.environ.get('CHANNEL_ACCESS_TOKEN')))
+        self.line_handler = WebhookHandler(str(os.environ.get('CHANNEL_SECRET')))
+
         @self.line_handler.add(MessageEvent, message=TextMessage)
         def handle_message(event):
             url = os.environ.get('API_APP_MESSAGE')
@@ -33,20 +31,15 @@ class LineEventHandler():
                 http_client = httpclient.AsyncHTTPClient()
                 http_req = httpclient.HTTPRequest(url, method='POST')
                 http_req.body = json.dumps(body).encode()
-                res = yield http_client.fetch(http_req)
-                res_body = res.body.decode('utf-8')
-                response = ResponseFactory.create_response(json.loads(res_body))
-                self.line_client.reply_message(
-                    event.reply_token,
-                    response
-                )
+                raw_response = yield http_client.fetch(http_req)
+                self.handle_response(event, raw_response)
             requestasync()
 
         @self.line_handler.add(MessageEvent, message=LocationMessage)
         def handle_message(event):
             url = os.environ.get('API_APP_ADDRESS')
             body = {
-                'request_location': event.message.address,
+                'request_address': event.message.address,
                 'user_id': event.source.user_id
             }
             @gen.coroutine
@@ -54,15 +47,26 @@ class LineEventHandler():
                 http_client = httpclient.AsyncHTTPClient()
                 http_req = httpclient.HTTPRequest(url, method='POST')
                 http_req.body = json.dumps(body).encode()
-                res = yield http_client.fetch(http_req)
-                res_body = res.body.decode('utf-8')
-                response = ResponseFactory.create_response(json.loads(res_body))
-                self.line_client.reply_message(
-                    event.reply_token,
-                    response
-                )
+                raw_response = yield http_client.fetch(http_req)
+                self.handle_response(event, raw_response)
             requestasync()
 
     @classmethod
-    def handle(self, body, signature):
+    def handle_request(self, body, signature):
         self.line_handler.handle(body, signature)
+
+    @classmethod
+    def handle_response(self, event, raw_response):
+        raw_body = raw_response.body.decode('utf-8')
+        response = json.loads(raw_body)
+        for message in response['messages']:            
+            reply = ResponseFactory.create_response(message)
+            self.line_client.push_message(
+                event.source.user_id,
+                reply
+            )
+
+class LineMessageDispatcher():
+    """LineEventHandler
+    """
+    pass

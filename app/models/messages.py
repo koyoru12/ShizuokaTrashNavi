@@ -8,11 +8,11 @@ class MessageFactory():
     message_dict = {}
 
     @classmethod
-    def create_message(self, message_type):
+    def create_message(self, message_type, context):
         for key in self.message_dict:
             if key == message_type:
-                return self.message_dict[key]()
-        raise Exception('Type not found > ' + context['type'])
+                return self.message_dict[key](context)
+        raise Exception('Type not found > ' + message_type)
 
     @classmethod
     def register_message(self, *message_class):
@@ -33,29 +33,49 @@ class HelpMessage(AbstractMessage):
     """
 
     message_type = 'help'
-    def __init__(self):
+    def __init__(self, context):
+        super().__init__(context)
         self.body = 'このアプリの説明'
         self.type = self.message_type
 
 
-class RequireLocationMessage(AbstractMessage):
-    """RequireLocationMessage
+class RequireAddressMessage(AbstractMessage):
+    """RequireAddressMessage
     """
 
-    message_type = 'require_location'
-    def __init__(self):
+    message_type = 'require_address'
+    def __init__(self, context):
+        super().__init__(context)
         self.body = 'どの地域の情報を知りたいですか？'
         self.type = self.message_type
 
 
-class ResponseLocationMessage(AbstractMessage):
-    """ResponseLocationMessage
+class ResponseAddressMessage(AbstractMessage):
+    """ResponseAddressMessage
     """
 
-    message_type = 'response_location'
-    def __init__(self):
+    message_type = 'response_address'
+    def __init__(self, context):
+        super().__init__(context)
         self.body = '地域情報を登録しました！'
         self.type = self.message_type
 
 
-MessageFactory.register_message(HelpMessage, RequireLocationMessage, ResponseLocationMessage)
+class TrashInfoMessage(AbstractMessage):
+    """TrashMessage
+    """
+
+    message_type = 'trash_info'
+    def __init__(self, context):
+        super().__init__(context)
+        self.body = 'ごみに関する情報です'
+        self.type = self.message_type
+        self.trash_info = []
+    
+    def append_trash_info(self, trash_info):
+        if trash_info == None:
+            self.body = 'ごめんなさい。情報が見つかりませんでした。'
+        self.trash_info = trash_info
+    
+
+MessageFactory.register_message(HelpMessage, RequireAddressMessage, ResponseAddressMessage, TrashInfoMessage)

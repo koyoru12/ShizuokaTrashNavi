@@ -1,24 +1,19 @@
 import os
 import sqlite3
 
+from app.db import DatabaseProvider
+
+
 class Users():
     @classmethod
-    def fetch(self, userId):
-        c = DbProvider.get_cursor()
-        c.execute('SELECT * FROM user WHERE id=:userId', {'userId': userId })
+    def fetch(self, user_id):
+        c = DatabaseProvider.get_connection('user').cursor()
+        c.execute('SELECT * FROM user WHERE id=?', (user_id,))
         return c.fetchone()
 
     @classmethod
-    def register(self, userId):
-        c = DbProvider.get_cursor()
-        c.execute('INSERT INTO user(:userId) VALUES(:userId)', {'userId': userId})
+    def register(self, user_id, city_id):
+        c = DatabaseProvider.get_connection('user').cursor()
+        c.execute('INSERT INTO user(?) VALUES(?)', (user_id, city_id))
 
-class DbProvider():
-    dbname = os.path.dirname(__file__) + '/user.db'
-    connection = sqlite3.connect(dbname)
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
 
-    @staticmethod
-    def get_cursor():
-        return DbProvider.cursor
