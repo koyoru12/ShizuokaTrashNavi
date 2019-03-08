@@ -59,11 +59,11 @@ class LineEventHandler():
     def handle_response(self, event, raw_response):
         raw_body = raw_response.body.decode('utf-8')
         response = json.loads(raw_body)
-        for message in response['messages']:            
-            reply = ResponseFactory.create_response(message)
-            self.line_client.push_message(
-                event.source.user_id,
-                reply
-            )
+        reply = []
+        for index, message in enumerate(response['messages']):
+            reply.append(ResponseFactory.create_response(message))
+        self.line_client.reply_message(
+            event.reply_token,
+            reply
+        )
 
-            

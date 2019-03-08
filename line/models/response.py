@@ -44,8 +44,7 @@ class RequireAddressResponse(AbstractResponse):
         return TextSendMessage(text=self._context['body'],
                         quick_reply=QuickReply(items=[
                             QuickReplyButton(action=LocationAction(label='location'))
-                        ])),
-
+                        ]))
 
 class TrashInfoResponse(AbstractResponse):
 
