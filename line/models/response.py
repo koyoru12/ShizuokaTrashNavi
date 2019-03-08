@@ -41,7 +41,7 @@ class RequireAddressResponse(AbstractResponse):
 
     message_type = 'require_address'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'],
+        return TextSendMessage(text=self._context['body']['line'],
                         quick_reply=QuickReply(items=[
                             QuickReplyButton(action=LocationAction(label='location'))
                         ]))

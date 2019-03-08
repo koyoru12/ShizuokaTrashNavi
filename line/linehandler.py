@@ -39,8 +39,9 @@ class LineEventHandler():
         def handle_message(event):
             url = os.environ.get('API_APP_ADDRESS')
             body = {
-                'request_address': event.message.address,
-                'user_id': event.source.user_id
+                'user_id': event.source.user_id,
+                'longitude': event.message.longitude,
+                'latitude': event.message.latitude
             }
             @gen.coroutine
             def requestasync():

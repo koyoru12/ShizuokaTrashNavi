@@ -38,11 +38,11 @@ class TextMessageRequestHandler(RequestHandler):
         
 
 class AddressMessageRequestHandler(RequestHandler):
-    def post(self):
+    async def post(self):
         body = json.loads(self.request.body)
         request_body = AddressMessageRequest(body)
         service = AddressMessageReplyService(request_body)
-        for message in service.try_register_address():
+        for message in await service.try_register_address():
             self.response.append_message(message)
         """
         # unnamed loadとかで送られてくることもあるので注意

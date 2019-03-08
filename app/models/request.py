@@ -10,5 +10,6 @@ class TextMessageRequest(util.JsonSerializable):
 class AddressMessageRequest(util.JsonSerializable):
     def __init__(self, request_body):
         self.user_id = request_body['user_id']
-        self.request_address = request_body['request_address']
+        self.longitude = request_body['longitude']
+        self.latitude = request_body['latitude']
     
