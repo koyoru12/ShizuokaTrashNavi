@@ -7,7 +7,6 @@ from linebot.models import (
 
 
 class ResponseFactory():
-
     response_builder_dict = {}
     @classmethod
     def create_response(self, context):
@@ -25,20 +24,17 @@ class ResponseFactory():
 
 
 class AbstractResponse():
-
     def __init__(self, context):
         self._context = context
 
 
 class HelpResponse(AbstractResponse):
-
     message_type = 'help'
     def create_response(self):
         return TextSendMessage(text=self._context['body'])
 
 
 class RequireAddressResponse(AbstractResponse):
-
     message_type = 'require_address'
     def create_response(self):
         return TextSendMessage(text=self._context['body']['line'],
@@ -47,7 +43,6 @@ class RequireAddressResponse(AbstractResponse):
                         ]))
 
 class TrashInfoResponse(AbstractResponse):
-
     message_type = 'trash_info'
     def create_response(self):
         if len(self._context['trash_info']) == 0:
@@ -55,8 +50,7 @@ class TrashInfoResponse(AbstractResponse):
         else:
             trashinfo = self._context['trash_info'][0]
             message = (
-            '{head}\n'
-            '-----------------------------------\n'
+            '{head}\n\n'
             '名前: {name}\n'
             '種類: {category}\n'
             '備考: {note}'
@@ -66,15 +60,24 @@ class TrashInfoResponse(AbstractResponse):
             return TextSendMessage(text=message)
 
 
-class ResponseAddressSuccessResponse(AbstractResponse):
+class TrashSelectResponse(AbstractResponse):
+    message_type = 'trash_select'
+    def create_response(self):
+        message = self._context['body'] + '\n\n'
+        for index, name in enumerate(self._context['trash_list']):
+            message += '・ {}'.format(name)
+            if index < len(self._context['trash_list']) - 1:
+                message += '\n'
+        return TextSendMessage(text=message)
 
+
+class ResponseAddressSuccessResponse(AbstractResponse):
     message_type = 'response_address_success'
     def create_response(self):
         return TextSendMessage(text=self._context['body'])
 
 
 class ResponseAddressRejectResponse(AbstractResponse):
-
     message_type = 'response_address_reject'
     def create_response(self):
         return TextSendMessage(text=self._context['body'])
@@ -83,4 +86,4 @@ class ResponseAddressRejectResponse(AbstractResponse):
 
 ResponseFactory.register_response(
     HelpResponse, RequireAddressResponse, ResponseAddressSuccessResponse,
-    ResponseAddressRejectResponse, TrashInfoResponse)
+    ResponseAddressRejectResponse, TrashInfoResponse, TrashSelectResponse)

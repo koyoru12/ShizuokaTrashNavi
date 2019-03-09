@@ -48,12 +48,24 @@ class TextMessageReplyService():
         else:
             q_city_id = user['city_id']
 
-        reply_repo = DynamicReplyRDBRepository()
-        data = reply_repo.find_reply_by_message(q_message, q_city_id)
+        reply_repo = DynamicReplyRDBRepository(q_message, q_city_id)
+        trash_list = reply_repo.find_reply_by_message()
 
-        message = MessageFactory.create_message('trash_info', self._request)
-        message.append_trash_info(data)
-        self._messages.append(message)
+        if len(trash_list) == 0:
+            # 結果が見つからない場合
+            message = MessageFactory.create_message('trash_info', self._request)
+            self._messages.append(message)        
+        elif 0 < len(trash_list) <= 3:
+            # 結果が3個以下の場合はすべてメッセージにする
+            for trash in trash_list:
+                message = MessageFactory.create_message('trash_info', self._request, trash=trash)
+                self._messages.append(message)        
+        else:
+            # 結果が4個以上の場合は選択肢にする
+            # FIX:
+            print('a')
+            message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
+            self._messages.append(message)        
 
         if user is None:
             self._messages.append(MessageFactory.create_message('require_address', self._request))

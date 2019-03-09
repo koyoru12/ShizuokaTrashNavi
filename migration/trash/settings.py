@@ -1,6 +1,6 @@
 migrate_settings = {
-    'city_table': True,
-    'fixedreply_table': True,
+    'city_table': False,
+    'fixedreply_table': False,
     'trash_table': True,
     'database_path': 'trash.db',
     'wndatabase_path': './resources/wnjpn.db',

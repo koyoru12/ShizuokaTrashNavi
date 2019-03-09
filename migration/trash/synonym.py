@@ -48,12 +48,13 @@ def insert_synonym(trash_id, synonym):
     row = trash_cursor.fetchone()
     if row == None:
         # synonymがなければ登録する
+        synonym_id = str(uuid.uuid4())
         trash_cursor.execute("""
         INSERT INTO synonym(
             id, name
         )VALUES(
             ?, ?
-        ) """, (str(uuid.uuid4()), synonym))
+        ) """, (synonym_id, synonym))
     else:
         synonym_id = row['id']
 
