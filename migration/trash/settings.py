@@ -1,5 +1,5 @@
 migrate_settings = {
-    'city_table': False,
+    'city_table': True,
     'fixedreply_table': False,
     'trash_table': True,
     'database_path': 'trash.db',

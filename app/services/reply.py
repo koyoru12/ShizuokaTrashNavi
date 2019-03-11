@@ -63,7 +63,7 @@ class TextMessageReplyService():
         else:
             # 結果が4個以上の場合は選択肢にする
             # FIX:
-            print('a')
+            trash_list = trash_list[0:10]
             message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
             self._messages.append(message)        
 

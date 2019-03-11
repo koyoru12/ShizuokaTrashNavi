@@ -9,7 +9,7 @@ from linebot.models import (
     MessageEvent, TextMessage, LocationMessage
 )
 
-from line.models.response import ResponseFactory
+from webhooks.models.response import ResponseFactory
 
 
 class LineEventHandler():
@@ -62,7 +62,8 @@ class LineEventHandler():
         response = json.loads(raw_body)
         reply = []
         for index, message in enumerate(response['messages']):
-            reply.append(ResponseFactory.create_response(message))
+            mes = ResponseFactory.create_response(message)
+            reply.append(mes)
         self.line_client.reply_message(
             event.reply_token,
             reply

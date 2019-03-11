@@ -1,3 +1,9 @@
-id,pref_name,city_name
-bfcc4cbe-7741-4322-ae7f-2de92c94d1b0,静岡県,静岡市
-f1e41d77-cfcc-4b07-b650-8588ea116be0,静岡県,磐田市
+id,pref_name,city_name,file_name
+bfcc4cbe-7741-4322-ae7f-2de92c94d1b0,静岡県,静岡市,shizuoka.csv
+f1e41d77-cfcc-4b07-b650-8588ea116be0,静岡県,浜松市,hamamatsu.csv
+9283d189-14f6-40cb-8bb7-89cb866a24f4,静岡県,袋井市,fukuroi.csv
+00e9af5c-da6d-42a0-9201-7e18cc8a5a3d,静岡県,菊川市,kikugawa.csv
+b595706f-391e-4473-a370-0b5a4f6c5243,静岡県,島田市,shimada.csv
+315bf30f-8386-4274-8f87-1cd9a04e0ce3,静岡県,伊東市,ito.csv
+c3a74a1a-766d-4496-a0f8-6c8718920b76,静岡県,三島市,mishima.csv
+874f2643-9413-4c24-9648-ec3437eeb227,静岡県,川根本町,kawane.csv

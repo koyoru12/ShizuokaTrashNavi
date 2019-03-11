@@ -4,6 +4,7 @@ appとは別に単体で使用する。
 ./city.csvからcityテーブルを、./fixedreplyからfixedreplyテーブルを
 ./trash_opendata/*内のcsvファイルからtrashテーブルを生成する。
 cityテーブルのidは、csvに指定がある場合は固定となり、指定がない場合は動的に生成される。
+trashテーブルのidは、csvファイルの名前に基づき、city.csvの設定に従って設定される
 
 ```
 # コマンドを実行するだけでOK
@@ -15,6 +16,7 @@ import sqlite3
 import csv
 import uuid
 import glob
+import re
 from contextlib import closing
 
 from settings import migrate_settings as SETTINGS
@@ -55,6 +57,13 @@ def import_city_data():
 
 
 def import_trash_data():
+    def find_city_id(file_name):
+        f = import_csv(SETTINGS['csv_city_path'])
+        for row in f:
+            if re.match('.+{}$'.format(row['file_name']), file_name):
+                return row['id']
+        raise Exception('FileName not Found > ' + file_name)
+
     cursor.execute("""
     CREATE TABLE trash(
         id TEXT PRIMARY KEY,
@@ -81,11 +90,14 @@ def import_trash_data():
 
     files = glob.glob(SETTINGS['opendata_path'])
     for file_name in files:
+        if not re.match('.+\.csv$', file_name):
+            continue
+
         f = import_csv(file_name)
 
         for row in f:
             data_id = str(uuid.uuid4())
-            city_id = row['city_id']
+            city_id = find_city_id(file_name)
             name = row['name']
             category = row['category']
             note = row['note']

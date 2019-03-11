@@ -4,12 +4,13 @@ import json
 
 import tornado
 from tornado import ioloop, web
-from line.router import LineWebRequestHandler
+from webhooks.router import LineRequestHandler, WebRequestHandler
 
 from app.router import TextMessageRequestHandler, AddressMessageRequestHandler
 
 application = tornado.web.Application([
-    (r"/line/webhook", LineWebRequestHandler),
+    (r"/line/webhook", LineRequestHandler),
+    (r"/web/webhook", WebRequestHandler),
     (r"/app/message", TextMessageRequestHandler),
     (r"/app/address", AddressMessageRequestHandler),
 ])

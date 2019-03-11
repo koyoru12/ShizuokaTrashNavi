@@ -26,35 +26,61 @@ class AbstractMessage(util.JsonSerializable):
 
 
 class HelpMessage(AbstractMessage):
-
     message_type = 'help'
     def __init__(self, context):
         super().__init__(context)
-        self.body = 'このアプリの説明'
+        self.body = {
+            'head': 'こんにちは！わたしにできることはありますか？',
+            'contents': [
+                {
+                    'text': 'ごみの分別の仕方を調べたい！',
+                    'postback': 'action?type=help_search_trash'
+                },
+                {
+                    'text': '検索する市町村を変えたい！',
+                    'postback': 'action?type=help_change_address'
+                }
+            ]
+        }
+
+
+class ThanksMessage(AbstractMessage):
+    message_type = 'thanks'
+    def __init__(self, context):
+        super().__init__(context)
+        self.body = 'どういたしまして！\nお役に立てて嬉しいです😊'
+
+
+class MistakeMessage(AbstractMessage):
+    message_type = 'mistake'
+    def __init__(self, context):
+        super().__init__(context)
+        self.body = 'ごめんなさい。\nお役に立てなくて残念です😔'
 
 
 class RequireAddressMessage(AbstractMessage):
-
     message_type = 'require_address'
     def __init__(self, context):
         super().__init__(context)
         self.body = {
             'line': 'まだ地域を登録していないみたいですね。\n'
                     + '下のボタンをタップしてお住まいの地域を教えてください！✨\n'
-                    + '分別情報をお住まいの地域で検索できるかも知れませんよ😉'
+                    + 'お住まいの地域の情報を検索できるかも知れませんよ😉'
         }
 
 
 class ResponseAddressSuccessMessage(AbstractMessage):
-
     message_type = 'response_address_success'
     def __init__(self, context, city_name):
         super().__init__(context)
-        self.body = '地域を登録しました！✨\n次から{}でごみ分別情報を検索しますね😉'.format(city_name)
+        # FIX:
+        # 地域変更の案内
+        self.body = ('地域を登録しました！✨\n次から{}でごみ分別情報を検索しますね😉\n'
+            '地域を変更するには位置情報を送るか、「ヘルプ」と言ってみてください！'
+            ).format(city_name)
 
 
 class ResponseAddressRejectMessage(AbstractMessage):
-
     message_type = 'response_address_reject'
     def __init__(self, context):
         super().__init__(context)
@@ -64,7 +90,6 @@ class ResponseAddressRejectMessage(AbstractMessage):
 
 
 class TrashInfoMessage(AbstractMessage):
-
     message_type = 'trash_info'
     def __init__(self, context, trash=None):
         super().__init__(context)
@@ -75,10 +100,11 @@ class TrashInfoMessage(AbstractMessage):
             self.body = 'ごめんなさい〜！😣\n情報が見つかりませんでした…。'
         else:
             trash_dict = {}
-            self.body = trash['city_name'] + 'の情報です。お探しの情報はこちらですか？'
+            self.body = trash['city_name'] + 'でこんな情報が見つかりました！'
             for key in trash.keys():
                 trash_dict[key] = trash[key]
             self.trash_info.append(trash_dict)
+
 
 class TrashSelectMessage(AbstractMessage):
     message_type = 'trash_select'
@@ -91,5 +117,6 @@ class TrashSelectMessage(AbstractMessage):
             self.trash_list.append(trash['name'])
 
 MessageFactory.register_message(
-    HelpMessage, RequireAddressMessage, ResponseAddressSuccessMessage,
+    HelpMessage, ThanksMessage, MistakeMessage,
+    RequireAddressMessage, ResponseAddressSuccessMessage,
     ResponseAddressRejectMessage, TrashInfoMessage, TrashSelectMessage)
