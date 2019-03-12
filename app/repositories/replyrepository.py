@@ -57,7 +57,6 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
         def handle():
             for handler in self._handlers:
                 rows = handler()
-                print(len(rows))
                 if len(rows) > 0:
                     return rows
             return []
@@ -69,14 +68,23 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
 
     def _find_from_trash(self):
         c = self._conn.cursor()
-        sql = """
-        SELECT trash.*, city.city_name
-            FROM trash, city
-            WHERE trash.city_id = city.id
-            AND trash.name = ?
-            AND trash.city_id = ?
-        """
-        c.execute(sql, (self._req, self._city_id))
+        if self._city_id == '':
+            sql = """
+            SELECT trash.*, city.city_name
+                FROM trash, city
+                WHERE trash.city_id = city.id
+                AND trash.name = ?
+            """
+            c.execute(sql, (self._req,))
+        else:
+            sql = """
+            SELECT trash.*, city.city_name
+                FROM trash, city
+                WHERE trash.city_id = city.id
+                AND trash.name = ?
+                AND trash.city_id = ?
+            """
+            c.execute(sql, (self._req, self._city_id))
         return c.fetchall()
 
     def _find_like_from_trash(self):

@@ -1,3 +1,7 @@
+# 依存外部ライブラリ
+tornado
+line-bot-sdk-python
+
 # エンドポイントの構成
 エンドポイントはLINEのWebhookとするものと、アプリケーション本体の処理を行うものとで分かれる。
 LINEエンドポイントはLINEとのインターフェースとして振る舞い
@@ -7,10 +11,13 @@ LINEエンドポイントはLINEとのインターフェースとして振る舞
 ユーザの発話イベントを受け付け、応答メッセージを返却する。
 
 ### リクエスト
-|param|type|desc|
-|:--|:--|:--|
-|user_id|string|LINEのユーザID|
-|request_message|string|ユーザが入力した文字列|
+
+|param|type|required|desc|
+|:--|:--|:--|:--|
+|user_id|string|true|LINEのユーザID|
+|request_message|string|true|ユーザが入力した文字列|
+|client|string|true|`line`または`web`|
+|config|object|false|コンフィグオブジェクト|
 
 ```
 {
@@ -19,7 +26,16 @@ LINEエンドポイントはLINEとのインターフェースとして振る舞
 }
 ```
 
+#### config
+
+|param|type|required|desc|
+|:--|:--|:--|:--|
+|search_city|string|false|検索市町村の指定|
+
+search_cityが指定された場合、ユーザに紐付けられている市町村情報より優先される。
+
 ### レスポンス
+
 |param|type|desc|
 |:--|:--|:--|
 |messages|messageの配列||

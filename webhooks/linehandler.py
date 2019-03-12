@@ -24,7 +24,8 @@ class LineEventHandler():
             url = os.environ.get('API_APP_MESSAGE')
             body = {
                 'request_message': event.message.text,
-                'user_id': event.source.user_id
+                'user_id': event.source.user_id,
+                'client': 'line'
             }
             @gen.coroutine
             def requestasync():

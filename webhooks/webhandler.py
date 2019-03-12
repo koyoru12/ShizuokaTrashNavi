@@ -13,10 +13,15 @@ class WebEventHandler():
         url = os.environ.get('API_APP_MESSAGE')
         body = {
             'request_message': body['text'],
-            'user_id': ''
+            'user_id': '',
+            'client': 'web',
+            'config': {
+                'search_city': '*'
+            }
         }
         http_client = httpclient.AsyncHTTPClient()
         http_req = httpclient.HTTPRequest(url, method='POST')
+        http_req.headers = {'Access-Token': os.environ['API_APP_ACCESS_TOKEN']}
         http_req.body = json.dumps(body).encode()
         raw_response = await http_client.fetch(http_req)
         return self.handle_response(raw_response)

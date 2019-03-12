@@ -19,22 +19,17 @@ class RequestHandler(tornado.web.RequestHandler):
 
 class TextMessageRequestHandler(RequestHandler):
     def post(self):
+        token = self.request.headers['Access-Token'] if 'Access-Token' in self.request.headers else ''
+        if token != os.environ['API_APP_ACCESS_TOKEN']:
+            self.send_error(400)
         body = json.loads(self.request.body)
         request_body = TextMessageRequest(body)
 
         service = TextMessageReplyService(request_body)
-        # 定型メッセージでの処理を試みる
-        for message in service.try_fixed_reply():
-            self.response.append_message(message)
-        if (self.response.message_length() > 0):
-            self._send_response()
-            return
-
-        # 定型メッセージで処理できない場合は動的メッセージで処理する
-        for message in service.try_dynamic_reply():
+        messages = service.reply()
+        for message in messages:
             self.response.append_message(message)
         self._send_response()
-
         
 
 class AddressMessageRequestHandler(RequestHandler):

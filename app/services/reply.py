@@ -2,6 +2,7 @@ import os
 import sqlite3
 import json
 import re
+from abc import ABCMeta, abstractclassmethod
 
 import tornado
 from tornado import gen, httpclient
@@ -18,9 +19,18 @@ class TextMessageReplyService():
     def __init__(self, request):
         self._request = request
         self._messages = []
+    
+    def add_handler(self, handler):
+        self._handlers.append(handler)
 
+    def reply(self):
+        # 定型メッセージでの処理を試みる
+        if self.try_fixed_reply():
+            return self._messages
+        if self.try_dynamic_reply():
+            return self._messages
 
-    def try_fixed_reply(self):
+    def try_fixed_reply(self): 
         repo = FixedReplyRDBRepository()
         data = repo.find_reply_by_message(self._request.request_message)
         if (data):
@@ -29,7 +39,8 @@ class TextMessageReplyService():
             message = MessageFactory.create_message(data[0]['message_type'], self._request)
             if message is not None:
                 self._messages.append(message)
-        return self._messages
+                return True
+            return False
 
 
     def try_dynamic_reply(self):
@@ -39,14 +50,24 @@ class TextMessageReplyService():
         user_id = self._request.user_id
         user_repo = UserRDBRepository()
         user = user_repo.find_user_by_id(user_id)
+        city_repo = CityRDBRepository()
 
-        if user is None:
-            # ユーザ登録がない場合は静岡市で検索する
-            city_repo = CityRDBRepository()
-            city = city_repo.find_city_by_name('静岡市')
-            q_city_id = city['id']
+        if self._request.config.search_city != '':
+            # リクエストで検索市町村が指定されている場合は優先
+            city = city_repo.find_city_by_name(self._request.config.search_city)
+            if city is None:
+                # 市町村が存在しない場合はすべての市町村から検索する
+                q_city_id = ''
+            else:
+                q_city_id = city['id']
         else:
-            q_city_id = user['city_id']
+            if user is None:
+                # ユーザ登録がない場合は静岡市で検索する
+                city = city_repo.find_city_by_name('静岡市')
+                q_city_id = city['id']
+            else:
+                # ユーザ登録がある場合は登録された市町村で検索する
+                q_city_id = user['city_id']
 
         reply_repo = DynamicReplyRDBRepository(q_message, q_city_id)
         trash_list = reply_repo.find_reply_by_message()
@@ -62,15 +83,16 @@ class TextMessageReplyService():
                 self._messages.append(message)        
         else:
             # 結果が4個以上の場合は選択肢にする
-            # FIX:
+            # 上限10個
             trash_list = trash_list[0:10]
             message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
             self._messages.append(message)        
 
-        if user is None:
+        if user is None and self._request.client == 'line':
+            # LINEでユーザ登録がない場合は登録を促す
             self._messages.append(MessageFactory.create_message('require_address', self._request))
         
-        return self._messages
+        return True
 
 
 class AddressMessageReplyService():
@@ -129,4 +151,3 @@ class AddressMessageReplyService():
         else:
             return None
 
-    
