@@ -85,10 +85,10 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
         SELECT trash.*, city.city_name
             FROM trash, city
             WHERE trash.city_id = city.id
-            AND trash.name LIKE ?
             AND trash.city_id = ?
+            AND (trash.name LIKE ? OR ? LIKE '%'||trash.name||'%')
         """
-        c.execute(sql, ('%' + self._req + '%', self._city_id))
+        c.execute(sql, (self._city_id, '%' + self._req + '%', self._req))
         return c.fetchall()
 
     def _find_from_synonym(self):
@@ -100,9 +100,9 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
             AND trash.city_id = ?
             AND trash.id = trash_synonym.trash_id
             AND synonym.id = trash_synonym.synonym_id
-            AND synonym.name LIKE ?
+            AND (synonym.name LIKE ? OR ? LIKE '%'||synonym.name||'%') 
         """
-        c.execute(sql, (self._city_id, '%' + self._req + '%'))
+        c.execute(sql, (self._city_id, '%' + self._req + '%', self._req))
         return c.fetchall()
 
         
