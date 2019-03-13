@@ -1,6 +1,9 @@
 import os
 from __settings import SETTINGS
 
+
 def import_environ():
-    for key in SETTINGS:
-        os.environ[key] = SETTINGS[key]
+    env = SETTINGS['env']
+    os.environ['env'] = env
+    for key in SETTINGS[env]:
+        os.environ[key] = SETTINGS[env][key]

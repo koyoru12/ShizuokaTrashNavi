@@ -89,14 +89,23 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
 
     def _find_like_from_trash(self):
         c = self._conn.cursor()
-        sql = """
-        SELECT trash.*, city.city_name
-            FROM trash, city
-            WHERE trash.city_id = city.id
-            AND trash.city_id = ?
-            AND (trash.name LIKE ? OR ? LIKE '%'||trash.name||'%')
-        """
-        c.execute(sql, (self._city_id, '%' + self._req + '%', self._req))
+        if self._city_id == '':
+            sql = """
+            SELECT trash.*, city.city_name
+                FROM trash, city
+                WHERE trash.city_id = city.id
+                AND (trash.name LIKE ? OR ? LIKE '%'||trash.name||'%')
+            """
+            c.execute(sql, ('%' + self._req + '%', self._req))
+        else:
+            sql = """
+            SELECT trash.*, city.city_name
+                FROM trash, city
+                WHERE trash.city_id = city.id
+                AND trash.city_id = ?
+                AND (trash.name LIKE ? OR ? LIKE '%'||trash.name||'%')
+            """
+            c.execute(sql, (self._city_id, '%' + self._req + '%', self._req))
         return c.fetchall()
 
     def _find_from_synonym(self):

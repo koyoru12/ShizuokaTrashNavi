@@ -16,7 +16,7 @@ class WebEventHandler():
             'user_id': '',
             'client': 'web',
             'config': {
-                'search_city': '*'
+                'search_city': ''
             }
         }
         http_client = httpclient.AsyncHTTPClient()

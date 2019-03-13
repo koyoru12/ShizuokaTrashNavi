@@ -19,6 +19,7 @@ class LineEventHandler():
         self.line_client = LineBotApi(str(os.environ.get('CHANNEL_ACCESS_TOKEN')))
         self.line_handler = WebhookHandler(str(os.environ.get('CHANNEL_SECRET')))
 
+        # テキストメッセージハンドラ
         @self.line_handler.add(MessageEvent, message=TextMessage)
         def handle_message(event):
             url = os.environ.get('API_APP_MESSAGE')
@@ -36,6 +37,7 @@ class LineEventHandler():
                 self.handle_response(event, raw_response)
             requestasync()
 
+        # 位置情報メッセージハンドラ
         @self.line_handler.add(MessageEvent, message=LocationMessage)
         def handle_message(event):
             url = os.environ.get('API_APP_ADDRESS')

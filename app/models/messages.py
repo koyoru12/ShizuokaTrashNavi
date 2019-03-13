@@ -97,7 +97,7 @@ class TrashInfoMessage(AbstractMessage):
         self.trash_info = []
 
         if trash == None:
-            self.body = 'ごめんなさい〜！😣\n情報が見つかりませんでした…。'
+            self.body = 'ごめんなさい〜！😣\n情報が見つかりませんでした…。\n他の言葉に言い換えて試してみてください！'
         else:
             trash_dict = {}
             self.body = trash['city_name'] + 'でこんな情報が見つかりました！'
@@ -115,6 +115,7 @@ class TrashSelectMessage(AbstractMessage):
 
         for trash in trash_list:
             self.trash_list.append(trash['name'])
+    
 
 MessageFactory.register_message(
     HelpMessage, ThanksMessage, MistakeMessage,

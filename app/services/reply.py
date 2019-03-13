@@ -24,7 +24,6 @@ class TextMessageReplyService():
         self._handlers.append(handler)
 
     def reply(self):
-        # 定型メッセージでの処理を試みる
         if self.try_fixed_reply():
             return self._messages
         if self.try_dynamic_reply():
@@ -44,24 +43,38 @@ class TextMessageReplyService():
 
 
     def try_dynamic_reply(self):
+        user_repo = UserRDBRepository()
+        city_repo = CityRDBRepository()
+
+        def check_city_assginment():
+            # 検索語に市町村が指定されているか確認する
+            m = re.match('(.+)[\s|　]+(.+)', self._request.request_message)
+            if m:
+                city_name = m.group(1)
+                trash_name = m.group(2)
+                city_data = city_repo.find_city_by_name(city_name, search_like=True)
+                if city_data != None:
+                    # 市町村指定があるときはリクエストを書き換える
+                    self._request.config.search_city = city_data['city_name']
+                    self._request.request_message = trash_name
+
+        check_city_assginment()
+
         q_message = self._request.request_message
         q_city_id = ''
-
         user_id = self._request.user_id
-        user_repo = UserRDBRepository()
         user = user_repo.find_user_by_id(user_id)
-        city_repo = CityRDBRepository()
 
         if self._request.config.search_city != '':
             # リクエストで検索市町村が指定されている場合は優先
             city = city_repo.find_city_by_name(self._request.config.search_city)
-            if city is None:
+            if city == None:
                 # 市町村が存在しない場合はすべての市町村から検索する
                 q_city_id = ''
             else:
                 q_city_id = city['id']
         else:
-            if user is None:
+            if user == None:
                 # ユーザ登録がない場合は静岡市で検索する
                 city = city_repo.find_city_by_name('静岡市')
                 q_city_id = city['id']
@@ -75,7 +88,11 @@ class TextMessageReplyService():
         if len(trash_list) == 0:
             # 結果が見つからない場合
             message = MessageFactory.create_message('trash_info', self._request)
-            self._messages.append(message)        
+            self._messages.append(message)
+            if q_city_id != '':
+                # 市町村を指定して検索した場合は「他の市町村で検索する」ボタンを出す
+                pass
+
         elif 0 < len(trash_list) <= 3:
             # 結果が3個以下の場合はすべてメッセージにする
             for trash in trash_list:

@@ -9,7 +9,7 @@ class TextMessageRequest(util.JsonSerializable):
         self.request_message = request_body['request_message']
         self.client = request_body['client']
         self.config = TextMessageConfig(request_body['config'])
-
+        self.action = request_body['action'] if 'action' in request_body else None
 
 class TextMessageConfig(util.JsonSerializable):
     def __init__(self, config):
