@@ -11,10 +11,10 @@ from webhooks.router import LineRequestHandler, WebRequestHandler
 from app.router import TextMessageRequestHandler, AddressMessageRequestHandler
 
 application = tornado.web.Application([
-    (r"/line/webhook", LineRequestHandler),
-    (r"/web/webhook", WebRequestHandler),
-    (r"/app/message", TextMessageRequestHandler),
-    (r"/app/address", AddressMessageRequestHandler),
+    (r"/api/line/webhook", LineRequestHandler),
+    (r"/api/web/webhook", WebRequestHandler),
+    (r"/api/app/message", TextMessageRequestHandler),
+    (r"/api/app/address", AddressMessageRequestHandler),
 ])
 
 if __name__ == "__main__":
@@ -26,5 +26,5 @@ if __name__ == "__main__":
         application.listen(8888)
     else:
         server.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
+        tornado.ioloop.IOLoop.current().start()
 

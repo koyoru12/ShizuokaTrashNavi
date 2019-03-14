@@ -17,6 +17,10 @@ class WebEventHandler():
             'client': 'web',
             'config': {
                 'search_city': ''
+            },
+            'action': {
+                'type': 'help_search_trash',
+                'query': {}
             }
         }
         http_client = httpclient.AsyncHTTPClient()

@@ -29,6 +29,14 @@ class TextMessageReplyService():
         if self.try_dynamic_reply():
             return self._messages
 
+    def try_action_reply(self):
+        act = self._request.action
+        if act.type == '':
+            return False
+        if act.type == 'help_search_trash':
+            pass
+
+
     def try_fixed_reply(self): 
         repo = FixedReplyRDBRepository()
         data = repo.find_reply_by_message(self._request.request_message)
