@@ -24,6 +24,8 @@ class TextMessageReplyService():
         self._handlers.append(handler)
 
     def reply(self):
+        if self.try_action_reply():
+            return self._messages
         if self.try_fixed_reply():
             return self._messages
         if self.try_dynamic_reply():
@@ -34,8 +36,15 @@ class TextMessageReplyService():
         if act.type == '':
             return False
         if act.type == 'help_search_trash':
-            pass
-
+            message = MessageFactory.create_message('help_search_trash', self._request)
+            self._messages.append(message)
+            return True
+        elif act.type == 'search_trash':
+            # コンフィグ設定を変更する
+            self._request.request_message = act.trash
+            self._request.config.search_city = act.city
+            return False
+        return False
 
     def try_fixed_reply(self): 
         repo = FixedReplyRDBRepository()
@@ -95,11 +104,14 @@ class TextMessageReplyService():
 
         if len(trash_list) == 0:
             # 結果が見つからない場合
-            message = MessageFactory.create_message('trash_info', self._request)
-            self._messages.append(message)
-            if q_city_id != '':
-                # 市町村を指定して検索した場合は「他の市町村で検索する」ボタンを出す
-                pass
+            if q_city_id == '':
+                # すべての市町村で見つからなかった場合
+                message = MessageFactory.create_message('trash_not_found', self._request)
+                self._messages.append(message)
+            else:
+                # 特定の市町村で検索した場合は「他の市町村で探す」ボタンを表示
+                message = MessageFactory.create_message('trash_not_found', self._request, searchbutton=True)
+                self._messages.append(message)
 
         elif 0 < len(trash_list) <= 3:
             # 結果が3個以下の場合はすべてメッセージにする
@@ -110,8 +122,13 @@ class TextMessageReplyService():
             # 結果が4個以上の場合は選択肢にする
             # 上限10個
             trash_list = trash_list[0:10]
-            message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
-            self._messages.append(message)        
+            if q_city_id == '':
+                # すべての市町村で検索した場合は市町村名をつける
+                message = MessageFactory.create_message('trash_select', self._request,
+                    trash_list=trash_list, show_city=True)
+            else:
+                message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
+            self._messages.append(message)
 
         if user is None and self._request.client == 'line':
             # LINEでユーザ登録がない場合は登録を促す

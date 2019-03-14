@@ -1,4 +1,5 @@
 import util
+import urllib
 
 
 class TextMessageRequest(util.JsonSerializable):
@@ -11,15 +12,20 @@ class TextMessageRequest(util.JsonSerializable):
         self.config = TextMessageConfig(request_body['config'])
         self.action = TextMessageAction(request_body['action'])
 
+
 class TextMessageConfig(util.JsonSerializable):
     def __init__(self, config):
         # 検索市町村の指定
         self.search_city = config['search_city'] if 'search_city' in config else ''
 
+
 class TextMessageAction(util.JsonSerializable):
     def __init__(self, action):
-        self.type = action['type'] if 'type' in action else ''
-        self.query = action['query'] if 'query' in action else '' 
+        self.type = ''
+        act_dic = urllib.parse.parse_qs(action)
+        for key in act_dic:
+            setattr(self, key, act_dic[key][0])
+
 
 class AddressMessageRequest(util.JsonSerializable):
     def __init__(self, request_body):

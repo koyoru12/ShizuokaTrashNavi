@@ -2,8 +2,8 @@ from linebot.models import (
     TextSendMessage, FlexSendMessage,
     TextMessage, LocationMessage, 
     QuickReply, QuickReplyButton,
-    BubbleContainer, BoxComponent, TextComponent, SeparatorComponent,
-    LocationAction, MessageAction
+    BubbleContainer, BoxComponent, TextComponent, SeparatorComponent, ButtonComponent,
+    LocationAction, MessageAction, PostbackAction
 )
 
 
@@ -32,56 +32,104 @@ class AbstractResponse():
 class HelpResponse(AbstractResponse):
     message_type = 'help'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'])
+        contents = [
+            TextComponent(
+                text=self._context['text'],
+                wrap=True,
+                size='sm'
+            ),
+            SeparatorComponent()
+        ]
+        for index, content in enumerate(self._context['contents']):
+            contents.append(TextComponent(
+                text=content['text'],
+                color='#0000ff',
+                wrap=True,
+                action=PostbackAction(data=content['postback'], display_text=content['text'])
+            ))
+        return FlexSendMessage(
+            alt_text=self._context['text'],
+            contents = BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=contents,
+                    spacing='md'
+                )
+            )
+        )
+        return TextSendMessage(text=self._context['text'])
 
 
 class ThanksResponse(AbstractResponse):
     message_type = 'thanks'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'])
+        return TextSendMessage(text=self._context['text'])
 
 
 class MistakeResponse(AbstractResponse):
     message_type = 'mistake'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'])
+        return TextSendMessage(text=self._context['text'])
 
 
 class RequireAddressResponse(AbstractResponse):
     message_type = 'require_address'
     def create_response(self):
-        return TextSendMessage(text=self._context['body']['line'],
+        return TextSendMessage(text=self._context['text']['line'],
                         quick_reply=QuickReply(items=[
                             QuickReplyButton(action=LocationAction(label='location'))
                         ]))
 
+
+class TrashNotFoundResponse(AbstractResponse):
+    message_type = 'trash_not_found'
+    def create_response(self):
+        contents = [
+            TextComponent(text=self._context['text'], wrap=True, size='sm'),
+        ]
+        if self._context['button'] != None:
+            contents.append(ButtonComponent(
+                action=PostbackAction(
+                label=self._context['button']['text'],
+                data=self._context['button']['postback']
+            )))
+
+        return FlexSendMessage(
+            alt_text=self._context['text'],
+            contents = BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=contents,
+                    spacing='md'
+                )
+            )
+        )
+
+
 class TrashInfoResponse(AbstractResponse):
     message_type = 'trash_info'
     def create_response(self):
-        if len(self._context['trash_info']) == 0:
-            return TextSendMessage(text=self._context['body'])
-        else:
-            trashinfo = self._context['trash_info'][0]
-            contents = [
-                TextComponent(
-                    text=self._context['body'],
-                    wrap=True,
-                    size='sm'
-                ),
-                SeparatorComponent(),
-            ]
-            if trashinfo['name'] != '':
-                contents.append(TextComponent(text='名前', color='#a0a0a0', size='sm'))
-                contents.append(TextComponent(text=trashinfo['name'], wrap=True, size='sm'))
-            if trashinfo['category'] != '':
-                contents.append(TextComponent(text='種類', color='#a0a0a0', size='sm'))
-                contents.append(TextComponent(text=trashinfo['category'], wrap=True,  size='sm'))
-            if trashinfo['note'] != '':
-                contents.append(TextComponent(text='メモ', color='#a0a0a0', size='sm'))
-                contents.append(TextComponent(text=trashinfo['note'], wrap=True, size='sm'))
+        trashinfo = self._context['trash_info'][0]
+        contents = [
+            TextComponent(
+                text=self._context['text'],
+                wrap=True,
+                size='sm'
+            ),
+            SeparatorComponent(),
+        ]
+        if trashinfo['name'] != '':
+            contents.append(TextComponent(text='名前', color='#a0a0a0', size='sm'))
+            contents.append(TextComponent(text=trashinfo['name'], wrap=True, size='sm'))
+        if trashinfo['category'] != '':
+            contents.append(TextComponent(text='種類', color='#a0a0a0', size='sm'))
+            contents.append(TextComponent(text=trashinfo['category'], wrap=True,  size='sm'))
+        if trashinfo['note'] != '':
+            contents.append(TextComponent(text='メモ', color='#a0a0a0', size='sm'))
+            contents.append(TextComponent(text=trashinfo['note'], wrap=True, size='sm'))
 
         return FlexSendMessage(
-            alt_text=self._context['body'],
+            alt_text=self._context['text'],
             contents = BubbleContainer(
                 body=BoxComponent(
                     layout='vertical',
@@ -97,7 +145,7 @@ class TrashSelectResponse(AbstractResponse):
     def create_response(self):
         contents = [
             TextComponent(
-                text=self._context['body'],
+                text=self._context['text'],
                 wrap=True,
                 size='sm'
             ),
@@ -111,7 +159,7 @@ class TrashSelectResponse(AbstractResponse):
                 action=MessageAction(text=name)
             ))
         return FlexSendMessage(
-            alt_text=self._context['body'],
+            alt_text=self._context['text'],
             contents = BubbleContainer(
                 body=BoxComponent(
                     layout='vertical',
@@ -125,17 +173,23 @@ class TrashSelectResponse(AbstractResponse):
 class ResponseAddressSuccessResponse(AbstractResponse):
     message_type = 'response_address_success'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'])
+        return TextSendMessage(text=self._context['text'])
 
 
 class ResponseAddressRejectResponse(AbstractResponse):
     message_type = 'response_address_reject'
     def create_response(self):
-        return TextSendMessage(text=self._context['body'])
+        return TextSendMessage(text=self._context['text'])
 
+
+class HelpSearchTrashResponse(AbstractResponse):
+    message_type = 'help_search_trash'
+    def create_response(self):
+        return TextSendMessage(text=self._context['text'])
 
 
 ResponseFactory.register_response(
     HelpResponse, ThanksResponse, MistakeResponse,
-    RequireAddressResponse, ResponseAddressSuccessResponse,
-    ResponseAddressRejectResponse, TrashInfoResponse, TrashSelectResponse)
+    RequireAddressResponse, ResponseAddressSuccessResponse, ResponseAddressRejectResponse,
+    TrashNotFoundResponse, TrashInfoResponse, TrashSelectResponse,
+    HelpSearchTrashResponse)

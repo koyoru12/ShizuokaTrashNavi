@@ -18,10 +18,7 @@ class WebEventHandler():
             'config': {
                 'search_city': ''
             },
-            'action': {
-                'type': 'help_search_trash',
-                'query': {}
-            }
+            'action': body['action']
         }
         http_client = httpclient.AsyncHTTPClient()
         http_req = httpclient.HTTPRequest(url, method='POST')
