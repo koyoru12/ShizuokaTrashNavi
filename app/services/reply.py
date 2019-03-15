@@ -81,9 +81,10 @@ class TextMessageReplyService():
         q_city_id = ''
         user_id = self._request.user_id
         user = user_repo.find_user_by_id(user_id)
-
+        print(self._request.config.search_city)
         if self._request.config.search_city != '':
             # リクエストで検索市町村が指定されている場合は優先
+            # ex)静岡　ペットボトル
             city = city_repo.find_city_by_name(self._request.config.search_city)
             if city == None:
                 # 市町村が存在しない場合はすべての市町村から検索する
@@ -147,6 +148,8 @@ class AddressMessageReplyService():
         city_name = await self._find_address_by_geolocation()
         if city_name == None:
             # 市町村が存在しない場合
+            # FIX:
+            # Webサイトへの誘導
             message = MessageFactory.create_message('response_address_reject', self._request)
             self._messages.append(message)
             return self._messages
@@ -154,6 +157,8 @@ class AddressMessageReplyService():
         city = city_repo.find_city_by_name(city_name)
         if city == None:
             # リクエストされた市町村に対応していない場合
+            # FIX:
+            # Webサイトへの誘導
             message = MessageFactory.create_message('response_address_reject', self._request)
             self._messages.append(message)
             return self._messages

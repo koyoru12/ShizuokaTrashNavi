@@ -8,13 +8,14 @@ import tornado
 from tornado import ioloop, web, httpserver
 from webhooks.router import LineRequestHandler, WebRequestHandler
 
-from app.router import TextMessageRequestHandler, AddressMessageRequestHandler
+from app.router import TextMessageRequestHandler, AddressMessageRequestHandler, GetValidCityHandler
 
 application = tornado.web.Application([
     (r"/api/line/webhook", LineRequestHandler),
     (r"/api/web/webhook", WebRequestHandler),
     (r"/api/app/message", TextMessageRequestHandler),
     (r"/api/app/address", AddressMessageRequestHandler),
+    (r"/api/app/city", GetValidCityHandler)
 ])
 
 if __name__ == "__main__":

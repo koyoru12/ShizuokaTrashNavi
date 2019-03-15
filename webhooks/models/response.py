@@ -3,9 +3,13 @@ from linebot.models import (
     TextMessage, LocationMessage, 
     QuickReply, QuickReplyButton,
     BubbleContainer, BoxComponent, TextComponent, SeparatorComponent, ButtonComponent,
-    LocationAction, MessageAction, PostbackAction
+    LocationAction, MessageAction, PostbackAction, URIAction
 )
 
+Colors = {
+    'primary': '#3469E6',
+    'link': '#0000FF'
+}    
 
 class ResponseFactory():
     response_builder_dict = {}
@@ -43,7 +47,7 @@ class HelpResponse(AbstractResponse):
         for index, content in enumerate(self._context['contents']):
             contents.append(TextComponent(
                 text=content['text'],
-                color='#0000ff',
+                color=Colors['link'],
                 wrap=True,
                 action=PostbackAction(data=content['postback'], display_text=content['text'])
             ))
@@ -89,9 +93,11 @@ class TrashNotFoundResponse(AbstractResponse):
         ]
         if self._context['button'] != None:
             contents.append(ButtonComponent(
+                style='primary',
+                color=Colors['primary'],
                 action=PostbackAction(
-                label=self._context['button']['text'],
-                data=self._context['button']['postback']
+                    label=self._context['button']['text'],
+                    data=self._context['button']['postback']
             )))
 
         return FlexSendMessage(
@@ -179,7 +185,27 @@ class ResponseAddressSuccessResponse(AbstractResponse):
 class ResponseAddressRejectResponse(AbstractResponse):
     message_type = 'response_address_reject'
     def create_response(self):
-        return TextSendMessage(text=self._context['text'])
+        contents = [
+            TextComponent(text=self._context['text'], wrap=True, size='sm'),
+        ]
+        contents.append(ButtonComponent(
+            style='primary',
+            color=Colors['primary'],
+            action=URIAction(
+                label=self._context['button']['text'],
+                uri=self._context['button']['uri']
+        )))
+
+        return FlexSendMessage(
+            alt_text=self._context['text'],
+            contents = BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=contents,
+                    spacing='md'
+                )
+            )
+        )
 
 
 class HelpSearchTrashResponse(AbstractResponse):

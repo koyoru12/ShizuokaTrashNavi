@@ -1,3 +1,5 @@
+import os
+
 import util
 
 
@@ -84,8 +86,12 @@ class ResponseAddressRejectMessage(AbstractMessage):
         super().__init__(context)
         # FIX:
         # 登録できる市町村の案内
-        self.text = 'ごめんなさい〜！😣\nその市町村には対応していないんです…。'
-
+        self.text = ('ごめんなさい〜！😣\nその市町村には対応していないんです…。\n'
+                     '対応している市町村は次のページのとおりです。')
+        self.button = {
+            'text': '市町村を変更する',
+            'uri': os.environ['URI_SELECTCITY']
+        }
 
 class TrashNotFoundMessage(AbstractMessage):
     message_type = 'trash_not_found'

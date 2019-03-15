@@ -1,12 +1,15 @@
 import os
 import json
+import datetime
 
+import jwt
 from tornado import httpclient, gen
 from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.models import (
-    MessageEvent, TextMessage, LocationMessage
+    MessageEvent, PostbackEvent,
+    TextMessage, LocationMessage
 )
 
 from webhooks.models.response import ResponseFactory
@@ -26,12 +29,37 @@ class LineEventHandler():
             body = {
                 'request_message': event.message.text,
                 'user_id': event.source.user_id,
-                'client': 'line'
+                'client': 'line',
+                'config': {},
+                'action': ''
             }
             @gen.coroutine
             def requestasync():
                 http_client = httpclient.AsyncHTTPClient()
                 http_req = httpclient.HTTPRequest(url, method='POST')
+                http_req.headers = {'Access-Token': os.environ['API_APP_ACCESS_TOKEN']}
+                http_req.body = json.dumps(body).encode()
+                raw_response = yield http_client.fetch(http_req)
+                self.handle_response(event, raw_response)
+            requestasync()
+
+        # ポストバックアクションハンドラ
+        @self.line_handler.add(PostbackEvent)
+        def handle_message(event):
+            print('hook')
+            url = os.environ.get('API_APP_MESSAGE')
+            body = {
+                'request_message': '',
+                'user_id': event.source.user_id,
+                'client': 'line',
+                'config': {},
+                'action': event.postback.data
+            }
+            @gen.coroutine
+            def requestasync():
+                http_client = httpclient.AsyncHTTPClient()
+                http_req = httpclient.HTTPRequest(url, method='POST')
+                http_req.headers = {'Access-Token': os.environ['API_APP_ACCESS_TOKEN']}
                 http_req.body = json.dumps(body).encode()
                 raw_response = yield http_client.fetch(http_req)
                 self.handle_response(event, raw_response)
@@ -50,6 +78,7 @@ class LineEventHandler():
             def requestasync():
                 http_client = httpclient.AsyncHTTPClient()
                 http_req = httpclient.HTTPRequest(url, method='POST')
+                http_req.headers = {'Access-Token': os.environ['API_APP_ACCESS_TOKEN']}
                 http_req.body = json.dumps(body).encode()
                 raw_response = yield http_client.fetch(http_req)
                 self.handle_response(event, raw_response)
@@ -72,3 +101,25 @@ class LineEventHandler():
             reply
         )
 
+
+class TokenProvider:
+    secret_key = os.environ['TOKEN_SECRET']
+    
+    @classmethod
+    def issue(self, user_id):
+        """認証トークンを発行する
+        """
+        encoded = jwt.encode({
+            'user_id': user_id,
+            'iat': datetime.datetime.now(),
+            'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
+        }, self.secret_key)
+        return encoded
+
+    @classmethod
+    def authenticate(token):
+        try:
+            decoded = jwt.decode(encoded, key)
+            return decoded['user_id']
+        except Exception:
+            return False
