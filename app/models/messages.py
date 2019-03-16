@@ -82,7 +82,7 @@ class ResponseAddressSuccessMessage(AbstractMessage):
 
 class ResponseAddressRejectMessage(AbstractMessage):
     message_type = 'response_address_reject'
-    def __init__(self, context):
+    def __init__(self, context, token=''):
         super().__init__(context)
         # FIX:
         # 登録できる市町村の案内
@@ -90,7 +90,7 @@ class ResponseAddressRejectMessage(AbstractMessage):
                      '対応している市町村は次のページのとおりです。')
         self.button = {
             'text': '市町村を変更する',
-            'uri': os.environ['URI_SELECTCITY']
+            'uri': '{}?token={}'.format( os.environ['URI_SELECTCITY'], token)
         }
 
 class TrashNotFoundMessage(AbstractMessage):

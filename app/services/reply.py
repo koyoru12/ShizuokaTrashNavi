@@ -13,7 +13,7 @@ from app.repositories import (
     FixedReplyRDBRepository, DynamicReplyRDBRepository,
     UserRDBRepository, CityRDBRepository
 )
-
+from app.services.token import TokenProvider
 
 class TextMessageReplyService():
     def __init__(self, request):
@@ -81,7 +81,6 @@ class TextMessageReplyService():
         q_city_id = ''
         user_id = self._request.user_id
         user = user_repo.find_user_by_id(user_id)
-        print(self._request.config.search_city)
         if self._request.config.search_city != '':
             # リクエストで検索市町村が指定されている場合は優先
             # ex)静岡　ペットボトル
@@ -147,30 +146,22 @@ class AddressMessageReplyService():
         city_repo = CityRDBRepository()
         city_name = await self._find_address_by_geolocation()
         if city_name == None:
-            # 市町村が存在しない場合
-            # FIX:
-            # Webサイトへの誘導
-            message = MessageFactory.create_message('response_address_reject', self._request)
+            # 市町村が存在しない場合はWebサイトに誘導
+            token = TokenProvider.issue(self._request.user_id)
+            message = MessageFactory.create_message('response_address_reject', self._request, token=token)
             self._messages.append(message)
             return self._messages
 
         city = city_repo.find_city_by_name(city_name)
         if city == None:
-            # リクエストされた市町村に対応していない場合
-            # FIX:
-            # Webサイトへの誘導
-            message = MessageFactory.create_message('response_address_reject', self._request)
+            # リクエストされた市町村に対応していない場合はWebサイトに誘導
+            token = TokenProvider.issue(self._request.user_id)
+            message = MessageFactory.create_message('response_address_reject', self._request, token=token)
             self._messages.append(message)
             return self._messages
 
         # 市町村情報を登録
-        user_repo = UserRDBRepository()
-        if user_repo.find_user_by_id(self._request.user_id) == None:
-            # ユーザ登録がない場合は登録
-            user_repo.register_user(self._request.user_id, city['id'])
-        else:
-            # ユーザ登録がある場合は更新
-            user_repo.update_user(self._request.user_id, city['id'])
+        CityService.register_user_city(self._request.user_id, city['id'])
         message = MessageFactory.create_message('response_address_success', self._request, city_name=city_name)
         self._messages.append(message)
         return self._messages
@@ -198,3 +189,19 @@ class AddressMessageReplyService():
         else:
             return None
 
+
+class CityService:
+    @classmethod
+    def get_all_city(self):
+        repo = CityRDBRepository()
+        return repo.get_all_city()
+
+    @classmethod
+    def register_user_city(self, user_id, city_id):
+        user_repo = UserRDBRepository()
+        if user_repo.find_user_by_id(user_id) == None:
+            # ユーザ登録がない場合は登録
+            user_repo.register_user(user_id, city_id)
+        else:
+            # ユーザ登録がある場合は更新
+            user_repo.update_user(user_id, city_id)

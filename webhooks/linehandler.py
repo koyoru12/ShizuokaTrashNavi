@@ -1,8 +1,6 @@
 import os
 import json
-import datetime
 
-import jwt
 from tornado import httpclient, gen
 from linebot import (
     LineBotApi, WebhookHandler
@@ -100,26 +98,3 @@ class LineEventHandler():
             event.reply_token,
             reply
         )
-
-
-class TokenProvider:
-    secret_key = os.environ['TOKEN_SECRET']
-    
-    @classmethod
-    def issue(self, user_id):
-        """認証トークンを発行する
-        """
-        encoded = jwt.encode({
-            'user_id': user_id,
-            'iat': datetime.datetime.now(),
-            'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
-        }, self.secret_key)
-        return encoded
-
-    @classmethod
-    def authenticate(token):
-        try:
-            decoded = jwt.decode(encoded, key)
-            return decoded['user_id']
-        except Exception:
-            return False

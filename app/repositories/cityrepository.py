@@ -14,6 +14,11 @@ class CityRepository(metaclass=ABCMeta):
 
 
 class CityRDBRepository(CityRepository):
+    def get_all_city(self):
+        c = self._conn.cursor()
+        c.execute('SELECT * FROM city')
+        return c.fetchall()
+
     def find_city_by_name(self, city_name, search_like=False):
         c = self._conn.cursor()
         if search_like:

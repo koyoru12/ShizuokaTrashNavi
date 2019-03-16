@@ -22,13 +22,6 @@ class LineRequestHandler(tornado.web.RequestHandler):
             self.send_error(400)
 
 
-class LineTokenAuthenticationHandler(tornado.web.RequestHandler):
-    """トークンを検証する
-    """
-    def post(self):
-        pass
-
-
 class WebRequestHandler(tornado.web.RequestHandler):
     """
     Webからのリクエストを処理する。
