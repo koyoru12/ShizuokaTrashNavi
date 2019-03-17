@@ -89,7 +89,7 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
 
     def _find_like_from_trash(self):
         c = self._conn.cursor()
-        if self._city_id == '':
+        if self._city_id == '*':
             sql = """
             SELECT trash.*, city.city_name
                 FROM trash, city

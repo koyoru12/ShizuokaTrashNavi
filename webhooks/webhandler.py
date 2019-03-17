@@ -5,21 +5,16 @@ import tornado
 from tornado import httpclient
 
 from webhooks.models.response import ResponseFactory
+from app.models import TextMessageRequest
 
 class WebEventHandler():
     @classmethod
     async def handle_request(self, body):
         body = json.loads(body)
+        body['client'] = 'web'
+        body['user_id'] = ''
+        request = TextMessageRequest(body)
         url = os.environ.get('API_APP_MESSAGE')
-        body = {
-            'request_message': body['text'],
-            'user_id': '',
-            'client': 'web',
-            'config': {
-                'search_city': ''
-            },
-            'action': body['action']
-        }
         http_client = httpclient.AsyncHTTPClient()
         http_req = httpclient.HTTPRequest(url, method='POST')
         http_req.headers = {'Access-Token': os.environ['API_APP_ACCESS_TOKEN']}

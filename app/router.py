@@ -33,15 +33,19 @@ class TextMessageRequestHandler(RequestHandler):
     def post(self):
         if not self._authenticate():
             self.send_error(400)
-        body = json.loads(self.request.body)
-        request_body = TextMessageRequest(body)
+        try:
+            body = json.loads(self.request.body)
+            request_body = TextMessageRequest(body)
 
-        service = TextMessageReplyService(request_body)
-        messages = service.reply()
-        for message in messages:
-            self.response.append_message(message)
-        self._send_response()
-        
+            service = TextMessageReplyService(request_body)
+            messages = service.reply()
+            for message in messages:
+                self.response.append_message(message)
+            self._send_response()
+        except Exception as e:
+            print(e)
+            self.send_error(400)        
+
 
 class AddressMessageRequestHandler(RequestHandler):
     async def post(self):
@@ -92,6 +96,7 @@ class ChangeUserCityHandler(RequestHandler):
             self.send_error(400)
         self.set_status(200)
         CityService.register_user_city(user_id, city_id)
+
 
 class ContactHandler(RequestHandler):
     """メールフォームのエンドポイント

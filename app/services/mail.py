@@ -17,9 +17,6 @@ def send_mail(dict_body):
     from_mail = os.environ['MAIL_ADDRESS']
     from_password = os.environ['MAIL_PASSWORD']
     to_mail = os.environ['MAIL_ADDRESS']
-    print(from_mail)
-    print(from_password)
-    print(to_mail)
 
     message = MIMEText(body)
     message['Subject'] = '[しずおかごみ出しNavi]メールフォーム'

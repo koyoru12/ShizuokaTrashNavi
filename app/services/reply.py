@@ -42,7 +42,7 @@ class TextMessageReplyService():
         elif act.type == 'search_trash':
             # コンフィグ設定を変更する
             self._request.request_message = act.trash
-            self._request.config.search_city = act.city
+            self._request.config.search_cityid = act.city
             return False
         return False
 
@@ -72,8 +72,11 @@ class TextMessageReplyService():
                 city_data = city_repo.find_city_by_name(city_name, search_like=True)
                 if city_data != None:
                     # 市町村指定があるときはリクエストを書き換える
-                    self._request.config.search_city = city_data['city_name']
+                    # ex)静岡　ペットボトル
                     self._request.request_message = trash_name
+                    city = city_repo.find_city_by_name(city_data['city_name'])
+                    if city != None:
+                        self._request.config.search_cityid = city['id']
 
         check_city_assginment()
 
@@ -81,15 +84,9 @@ class TextMessageReplyService():
         q_city_id = ''
         user_id = self._request.user_id
         user = user_repo.find_user_by_id(user_id)
-        if self._request.config.search_city != '':
-            # リクエストで検索市町村が指定されている場合は優先
-            # ex)静岡　ペットボトル
-            city = city_repo.find_city_by_name(self._request.config.search_city)
-            if city == None:
-                # 市町村が存在しない場合はすべての市町村から検索する
-                q_city_id = ''
-            else:
-                q_city_id = city['id']
+        if self._request.config.search_cityid != '':
+            # 市町村IDが指定されている場合は優先
+            q_city_id = self._request.config.search_cityid
         else:
             if user == None:
                 # ユーザ登録がない場合は静岡市で検索する
@@ -104,7 +101,7 @@ class TextMessageReplyService():
 
         if len(trash_list) == 0:
             # 結果が見つからない場合
-            if q_city_id == '':
+            if q_city_id == '*':
                 # すべての市町村で見つからなかった場合
                 message = MessageFactory.create_message('trash_not_found', self._request)
                 self._messages.append(message)
@@ -122,12 +119,8 @@ class TextMessageReplyService():
             # 結果が4個以上の場合は選択肢にする
             # 上限10個
             trash_list = trash_list[0:10]
-            if q_city_id == '':
-                # すべての市町村で検索した場合は市町村名をつける
-                message = MessageFactory.create_message('trash_select', self._request,
-                    trash_list=trash_list, show_city=True)
-            else:
-                message = MessageFactory.create_message('trash_select', self._request, trash_list=trash_list)
+            message = MessageFactory.create_message('trash_select', self._request,
+                trash_list=trash_list, show_city=True)
             self._messages.append(message)
 
         if user is None and self._request.client == 'line':

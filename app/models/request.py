@@ -16,8 +16,7 @@ class TextMessageRequest(util.JsonSerializable):
 class TextMessageConfig(util.JsonSerializable):
     def __init__(self, config):
         # 検索市町村の指定
-        self.search_city = config['search_city'] if 'search_city' in config else ''
-
+        self.search_cityid = config['search_cityid'] if 'search_cityid' in config else ''
 
 class TextMessageAction(util.JsonSerializable):
     def __init__(self, action):
