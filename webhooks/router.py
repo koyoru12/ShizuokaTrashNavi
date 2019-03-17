@@ -27,7 +27,7 @@ class WebRequestHandler(tornado.web.RequestHandler):
     Webからのリクエストを処理する。
     """
     async def post(self):
-        self.set_header('Access-Control-Allow-Origin', self.request.headers['origin'])
+        self.set_header('Access-Control-Allow-Origin', '*')
         body = (self.request.body).decode('utf-8')
         response = ''
         try:

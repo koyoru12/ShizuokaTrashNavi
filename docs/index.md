@@ -33,7 +33,7 @@ POST
 
 |param|type|required|desc|
 |:--|:--|:--|:--|
-|search_city|string|false|検索市町村の指定|
+|search_cityid|string|false|検索市町村の指定(ex.0ea614-08c3d...)|
 
 search_cityが指定された場合、ユーザに紐付けられている市町村情報より優先される。
 
