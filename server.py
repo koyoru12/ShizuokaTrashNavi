@@ -1,6 +1,15 @@
 import env
 env.import_environ()
 
+import logging
+import logging.handlers
+
+formatter = logging.Formatter('%(levelname)s %(asctime)s %(filename)s %(message)s')
+logger = logging.getLogger()
+rfh = logging.handlers.RotatingFileHandler('./log/info.log', maxBytes=100000, backupCount=3)
+rfh.setFormatter(formatter)
+logger.addHandler(rfh)
+
 import json
 import os
 

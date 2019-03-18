@@ -27,6 +27,13 @@ class AbstractMessage(util.JsonSerializable):
         self.type = self.message_type
 
 
+class HandShakeMessage(AbstractMessage):
+    message_type = 'handshake'
+    def __init__(self, context, trash_list=None):
+        super().__init__(context)
+        self.text = 'こんにちは！\n捨てたいごみの名前を教えてください！\n使い方を知りたいときは「ヘルプ」と呟いてみてくださいね😉'
+
+
 class HelpMessage(AbstractMessage):
     message_type = 'help'
     def __init__(self, context):
@@ -39,7 +46,7 @@ class HelpMessage(AbstractMessage):
                 },
                 {
                     'text': '検索する市町村を変えたい！',
-                    'postback': 'action?type=help_change_address'
+                    'postback': 'type=help_change_usercity'
                 }
         ]
 
@@ -62,11 +69,9 @@ class RequireAddressMessage(AbstractMessage):
     message_type = 'require_address'
     def __init__(self, context):
         super().__init__(context)
-        self.text = {
-            'line': 'まだ地域を登録していないみたいですね。\n'
-                    + '下のボタンをタップしてお住まいの地域を教えてください！✨\n'
-                    + 'お住まいの地域の情報を検索できるかも知れませんよ😉'
-        }
+        self.text = ('まだ地域を登録していないみたいですね。\n'
+                     '下のボタンをタップしてお住まいの地域を教えてください！✨\n'
+                     'お住まいの地域の情報を検索できるかも知れませんよ😉')
 
 
 class ResponseAddressSuccessMessage(AbstractMessage):
@@ -140,12 +145,23 @@ class HelpSearchTrashMessage(AbstractMessage):
     message_type = 'help_search_trash'
     def __init__(self, context, trash_list=None):
         super().__init__(context)
-        self.text = 'どんなごみか教えてください！\nたとえばペットボトルなら「ペットボトル」と言うだけで大丈夫ですよ😉'
+        self.text = ('どんなごみか教えてください！\n'
+                     'たとえばペットボトルなら「ペットボトル」と言うだけで大丈夫ですよ😉')
+        
+    
+class HelpChangeUserCityMessage(AbstractMessage):
+    message_type = 'help_change_usercity'
+    def __init__(self, context, trash_list=None):
+        super().__init__(context)
+        if context.client == 'line':
+            self.text = '分かりました！\n下のボタンをタップして位置情報を送ってください😉'
+        else:
+            self.text = '分かりました！\nメッセージ欄の左側にある設定ボタンをクリックしてみてください😉'
 
 
 MessageFactory.register_message(
-    HelpMessage, ThanksMessage, MistakeMessage,
+    HandShakeMessage, HelpMessage, ThanksMessage, MistakeMessage,
     RequireAddressMessage, ResponseAddressSuccessMessage, ResponseAddressRejectMessage,
     TrashNotFoundMessage, TrashInfoMessage, TrashSelectMessage,
-    HelpSearchTrashMessage
+    HelpSearchTrashMessage, HelpChangeUserCityMessage
     )

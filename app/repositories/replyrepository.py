@@ -111,7 +111,7 @@ class DynamicReplyRDBRepository(DynamicReplyRepository):
     def _find_from_synonym(self):
         c = self._conn.cursor()
         sql = """
-        SELECT trash.*, city.city_name
+        SELECT DISTINCT trash.*, city.city_name
             FROM trash, trash_synonym, synonym, city
             WHERE trash.city_id = city.id
             AND trash.city_id = ?

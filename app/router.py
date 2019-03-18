@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import logging
 
 import tornado
 from tornado import httpclient, gen
@@ -43,7 +44,7 @@ class TextMessageRequestHandler(RequestHandler):
                 self.response.append_message(message)
             self._send_response()
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)        
 
 
@@ -77,7 +78,7 @@ class LineTokenAuthenticationHandler(RequestHandler):
                 self.send_error(400)
             self.set_status(200)
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)
 
 
@@ -92,7 +93,7 @@ class ChangeUserCityHandler(RequestHandler):
             if not user_id:
                 self.send_error(400)
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)
         self.set_status(200)
         CityService.register_user_city(user_id, city_id)
@@ -107,5 +108,5 @@ class ContactHandler(RequestHandler):
             await IOLoop.current().run_in_executor(None, send_mail, content)
             self.set_status(200)
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)

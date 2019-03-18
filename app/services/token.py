@@ -13,8 +13,8 @@ class TokenProvider:
         """
         encoded = jwt.encode({
             'user_id': user_id,
-            'iat': datetime.datetime.now(),
-            'exp': datetime.datetime.now() + datetime.timedelta(hours=1)
+            'iat': datetime.datetime.utcnow(),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         }, self.secret_key).decode()
         return encoded
 

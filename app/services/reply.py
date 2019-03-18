@@ -36,14 +36,28 @@ class TextMessageReplyService():
         if act.type == '':
             return False
         if act.type == 'help_search_trash':
+            # (ヘルプ)ごみの出し方
             message = MessageFactory.create_message('help_search_trash', self._request)
             self._messages.append(message)
             return True
+        if act.type == 'help_change_usercity':
+            # (ヘルプ)市町村変更
+            message = MessageFactory.create_message('help_change_usercity', self._request)
+            self._messages.append(message)
+            return True
         elif act.type == 'search_trash':
+            # 市町村を指定してごみ情報の検索
             # コンフィグ設定を変更する
             self._request.request_message = act.trash
             self._request.config.search_cityid = act.city
             return False
+        elif act.type == 'handshake':
+            # Web版のハンドシェイク
+            message = MessageFactory.create_message('handshake', self._request)
+            self._messages.append(message)
+            return True
+            
+
         return False
 
     def try_fixed_reply(self): 

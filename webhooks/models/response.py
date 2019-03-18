@@ -33,6 +33,12 @@ class AbstractResponse():
         self._context = context
 
 
+class HandShakeResponse(AbstractResponse):
+    message_type = 'handshake'
+    def create_response(self):
+        return TextSendMessage(text=self._context['text'])
+
+
 class HelpResponse(AbstractResponse):
     message_type = 'help'
     def create_response(self):
@@ -79,7 +85,7 @@ class MistakeResponse(AbstractResponse):
 class RequireAddressResponse(AbstractResponse):
     message_type = 'require_address'
     def create_response(self):
-        return TextSendMessage(text=self._context['text']['line'],
+        return TextSendMessage(text=self._context['text'],
                         quick_reply=QuickReply(items=[
                             QuickReplyButton(action=LocationAction(label='location'))
                         ]))
@@ -212,10 +218,19 @@ class HelpSearchTrashResponse(AbstractResponse):
     message_type = 'help_search_trash'
     def create_response(self):
         return TextSendMessage(text=self._context['text'])
+    
+
+class HelpChangeUserCityResponse(AbstractResponse):
+    message_type = 'help_change_usercity'
+    def create_response(self):
+        return TextSendMessage(text=self._context['text'],
+                        quick_reply=QuickReply(items=[
+                            QuickReplyButton(action=LocationAction(label='location'))
+                        ]))
 
 
 ResponseFactory.register_response(
-    HelpResponse, ThanksResponse, MistakeResponse,
+    HandShakeResponse, HelpResponse, ThanksResponse, MistakeResponse,
     RequireAddressResponse, ResponseAddressSuccessResponse, ResponseAddressRejectResponse,
     TrashNotFoundResponse, TrashInfoResponse, TrashSelectResponse,
-    HelpSearchTrashResponse)
+    HelpSearchTrashResponse, HelpChangeUserCityResponse)

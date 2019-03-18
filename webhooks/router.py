@@ -1,4 +1,5 @@
 import json
+import logging
 
 import tornado
 from linebot.exceptions import (
@@ -18,7 +19,7 @@ class LineRequestHandler(tornado.web.RequestHandler):
         try:
             LineEventHandler.handle_request(body, signature)
         except InvalidSignatureError as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)
 
 
@@ -33,7 +34,7 @@ class WebRequestHandler(tornado.web.RequestHandler):
         try:
             response = await WebEventHandler.handle_request(body)
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.send_error(400)
         self.write(json.dumps(response).encode())
 
