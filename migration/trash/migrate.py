@@ -21,7 +21,7 @@ from contextlib import closing
 
 from settings import migrate_settings as SETTINGS
 from dbconn import DatabaseConnection
-from synonym import import_synonym_data
+from synonym2 import import_synonym_data
 
 conn = DatabaseConnection.get_connection(SETTINGS['database_path'])
 cursor = conn.cursor()

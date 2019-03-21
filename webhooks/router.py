@@ -33,8 +33,8 @@ class WebRequestHandler(tornado.web.RequestHandler):
         response = ''
         try:
             response = await WebEventHandler.handle_request(body)
+            self.write(json.dumps(response).encode())
         except Exception as e:
             logging.error(e)
             self.send_error(400)
-        self.write(json.dumps(response).encode())
 

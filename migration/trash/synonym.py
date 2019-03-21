@@ -11,6 +11,7 @@ senseからwordidをキーにしてsynsetを取得
 senseからsynsetをキーにしてwordidを取得
 """
 
+
 import re
 import uuid
 

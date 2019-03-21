@@ -7,7 +7,8 @@ import tornado
 from tornado import httpclient, gen
 from tornado.ioloop import IOLoop
 
-from app.services import TextMessageReplyService, AddressMessageReplyService, CityService, TokenProvider
+from app.services import (TextMessageReplyService, AddressMessageReplyService,
+                          CityService, TokenProvider, ChatLogger)
 from app.services.mail import send_mail
 from app.models import MessageFactory, TextMessageRequest, AddressMessageRequest, Response
 
@@ -42,6 +43,7 @@ class TextMessageRequestHandler(RequestHandler):
             messages = service.reply()
             for message in messages:
                 self.response.append_message(message)
+            ChatLogger.log(request_body, self.response)
             self._send_response()
         except Exception as e:
             logging.error(e)
@@ -52,19 +54,27 @@ class AddressMessageRequestHandler(RequestHandler):
     async def post(self):
         if not self._authenticate():
             self.send_error(400)
-        body = json.loads(self.request.body)
-        request_body = AddressMessageRequest(body)
-        service = AddressMessageReplyService(request_body)
-        for message in await service.try_register_address():
-            self.response.append_message(message)
-        self._send_response()
+        try:
+            body = json.loads(self.request.body)
+            request_body = AddressMessageRequest(body)
+            service = AddressMessageReplyService(request_body)
+            for message in await service.try_register_address():
+                self.response.append_message(message)
+            self._send_response()
+        except Exception as e:
+            logging.error(e)
+            self.send_error(400)        
 
 
 class GetValidCityHandler(RequestHandler):
     def get(self):
-        rows = CityService.get_all_city()
-        city_list = [{'name':city['city_name'], 'id':city['id']} for city in rows]
-        self.write(json.dumps(city_list).encode())
+        try:
+            rows = CityService.get_all_city()
+            city_list = [{'name':city['city_name'], 'id':city['id']} for city in rows]
+            self.write(json.dumps(city_list).encode())
+        except Exception as e:
+            logging.error(e)
+            self.send_error(400)        
 
 
 class LineTokenAuthenticationHandler(RequestHandler):

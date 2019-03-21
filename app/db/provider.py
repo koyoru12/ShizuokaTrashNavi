@@ -42,6 +42,8 @@ class DatabaseProvider():
         raise Exception('Name not found > ' + name)
 
 dbdir = str(os.environ.get('DATABASE_DIR'))
+logdir = str(os.environ.get('LOG_DIR'))
 DatabaseProvider.append_connection('user', dbdir + '/user.db')
 DatabaseProvider.append_connection('trash', dbdir + '/trash.db')
+DatabaseProvider.append_connection('chatlog', logdir + '/chatlog.db')
 

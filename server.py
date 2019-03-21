@@ -3,13 +3,6 @@ env.import_environ()
 
 import logging
 import logging.handlers
-
-formatter = logging.Formatter('%(levelname)s %(asctime)s %(filename)s %(message)s')
-logger = logging.getLogger()
-rfh = logging.handlers.RotatingFileHandler('./log/info.log', maxBytes=100000, backupCount=3)
-rfh.setFormatter(formatter)
-logger.addHandler(rfh)
-
 import json
 import os
 
@@ -19,6 +12,18 @@ from webhooks.router import LineRequestHandler, WebRequestHandler
 
 from app.router import (TextMessageRequestHandler, AddressMessageRequestHandler, GetValidCityHandler,
                        LineTokenAuthenticationHandler, ChangeUserCityHandler, ContactHandler)
+
+
+# ログ出力関係のセッティング
+if os.environ['env'] == 'dev':
+    pass
+else:
+    formatter = logging.Formatter('%(levelname)s %(asctime)s %(filename)s %(message)s')
+    logger = logging.getLogger()
+    rfh = logging.handlers.RotatingFileHandler('./log/info.log', maxBytes=100000, backupCount=3)
+    rfh.setFormatter(formatter)
+    logger.addHandler(rfh)
+
 
 application = tornado.web.Application([
     (r"/api/line/webhook", LineRequestHandler),

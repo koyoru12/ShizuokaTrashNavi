@@ -78,8 +78,6 @@ class ResponseAddressSuccessMessage(AbstractMessage):
     message_type = 'response_address_success'
     def __init__(self, context, city_name):
         super().__init__(context)
-        # FIX:
-        # 地域変更の案内
         self.text = ('地域を登録しました！✨\n次から{}でごみ分別情報を検索しますね😉\n'
             '地域を変更するには位置情報を送るか、「ヘルプ」と言ってみてください！'
             ).format(city_name)
@@ -89,8 +87,6 @@ class ResponseAddressRejectMessage(AbstractMessage):
     message_type = 'response_address_reject'
     def __init__(self, context, token=''):
         super().__init__(context)
-        # FIX:
-        # 登録できる市町村の案内
         self.text = ('ごめんなさい〜！😣\nその市町村には対応していないんです…。\n'
                      '対応している市町村は次のページのとおりです。')
         self.button = {

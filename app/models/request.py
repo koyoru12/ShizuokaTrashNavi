@@ -6,9 +6,9 @@ class TextMessageRequest(util.JsonSerializable):
     def __init__(self, request_body):
         request_body['config'] = request_body['config'] if 'config' in request_body else {}
 
-        self.user_id = request_body['user_id']
-        self.request_message = request_body['request_message']
-        self.client = request_body['client']
+        self.user_id = request_body['user_id'] if 'user_id' in request_body else ''
+        self.request_message = request_body['request_message'] if 'request_message' in request_body else ''
+        self.client = request_body['client'] if 'client' in request_body else ''
         self.config = TextMessageConfig(request_body['config'])
         self.action = TextMessageAction(request_body['action'])
 

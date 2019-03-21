@@ -15,7 +15,6 @@ class ResponseFactory():
     response_builder_dict = {}
     @classmethod
     def create_response(self, context):
-        print(context)
         for key in self.response_builder_dict:
             if key == context['type']:
                 builder = self.response_builder_dict[key](context)

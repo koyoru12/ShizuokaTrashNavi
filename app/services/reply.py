@@ -139,7 +139,9 @@ class TextMessageReplyService():
 
         if user is None and self._request.client == 'line':
             # LINEでユーザ登録がない場合は登録を促す
-            self._messages.append(MessageFactory.create_message('require_address', self._request))
+            # 暫定的に機能停止中
+            # self._messages.append(MessageFactory.create_message('require_address', self._request))
+            pass
         
         return True
 
